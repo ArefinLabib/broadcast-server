@@ -17,7 +17,7 @@ export const connectToServer = (port = 8080) => {
     })
 
     socket.on('message', (data) => {
-        console.log(`\n[Client] Message Received: ${data.toString()}`);
+        console.log(`\n[Client] ${data.toString()}`);
     })
 
     rl.on("line", (input) => {
@@ -27,4 +27,11 @@ export const connectToServer = (port = 8080) => {
             console.log(`[Client] Please wait, still connecting...`);
         }
     })
+
+    socket.on('close', (code, reason) => {
+        console.log(`\n[Client] Disconnected from server. Reason: ${reason.toString()}`);
+
+        rl.close(); 
+        process.exit(0); 
+    });
 }
