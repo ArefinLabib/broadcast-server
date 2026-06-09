@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
-import { startServer } from "./server";
+import { startServer } from "./server.js";
+import { connectToServer } from "./client.js";
 
 const args = process.argv.slice(2)
 
@@ -12,6 +13,7 @@ if (command === 'start') {
     
 } else if (command === 'connect') {
     console.log("A new client is connecting");
+    connectToServer(args[1])
     
 } else {
     console.log("Unknown Command. Use 'Start' or 'Connect'");
