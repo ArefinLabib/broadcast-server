@@ -1,13 +1,27 @@
 import WebSocket, { WebSocketServer } from 'ws';
 
 export const startServer = (port = 8080) => {
-    const wss = new WebSocketServer({port: port});
+    const wss = new WebSocketServer({port: port,
+        handleProtocols: (protcols, request) => {
+            console.log(`[Handshake] Client requested specific protocols: ${Array.from(protcols)}`)
+
+            const supportedProtocols = ['cli-chat-v1']
+            for (const protocol of protcols) {
+                if (supportedProtocols.includes(protocol)) {
+                    return protocol
+                }
+            }
+            return False
+        }
+    });
     console.log(`[Server] Listening for connections on ws://localhost:${port}`);
     
     const clients = new Set();
     let clientIdCounter = 1;
 
     wss.on("connection", (socket) => {
+        console.log(`[Server] Connected to client with ${socket.protocol} Protocol`);
+        
         socket.id = clientIdCounter++
         console.log(`Client ${socket.id} has connected!`);
 

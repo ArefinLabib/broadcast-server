@@ -3,7 +3,8 @@ import readline from 'readline'
 
 export const connectToServer = (port = 8080) => {
     const serverUrl = `ws://localhost:${port}`
-    const socket = new WebSocket(serverUrl)
+    const protocols = ['cli-chat-v1', 'cli-json-v1']
+    const socket = new WebSocket(serverUrl, protocols)
 
     console.log(`[Client] Attempting to connect to server`);
     
