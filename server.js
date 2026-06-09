@@ -10,27 +10,42 @@ export const startServer = (port = 8080) => {
     wss.on("connection", (socket) => {
         socket.id = clientIdCounter++
         console.log(`Client ${socket.id} has connected!`);
+
+        socket.isAlive = True
+
         clients.add(socket)
-        // console.log({clients});
-        
+
+        socket.on('pong', () => {
+            socket.isAlive = True
+        })
 
         socket.on('message', (data) => {
             console.log(`[Server] Received message from client ${socket.id}: ${data.toString()}`);
             
             for (const client of clients) {
-                if (client.id !== socket.id) {
-                    if (client.readyState === WebSocket.OPEN){
-                        client.send(`Client ${socket.id}: ${data.toString()}`);
-                    }
+                if (client !== socket && client.readyState === WebSocket.OPEN) {
+                    client.send(`Client ${socket.id}: ${data.toString()}`);
                 }
             }
-        })
+        });
 
         socket.on('close', () => {
             clients.delete(socket)
             console.log(`Client ${socket.id} has disconnected.`);
         })
     })
+
+     const interval = setInterval(() => {
+        for (const client of clients) {
+            if (client.isAlive === False) {
+                console.log(`[Server] Client ${client.id} timed out. Terminating.`);
+                clients.delete(client);
+                return client.terminate();
+            }
+            client.isAlive = False
+            client.ping()
+        }
+     }, 30000)
 
     process.on('SIGINT', () => {
         console.log("\n[Server] Initiating graceful shutdown...");
@@ -45,5 +60,7 @@ export const startServer = (port = 8080) => {
             console.log("[Server] All connections closed. Goodbye!");
             process.exit(0); 
         });
+
+        clearInterval(interval);
     });
 }
